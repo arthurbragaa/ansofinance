@@ -1,4 +1,4 @@
-import {Page, NavController} from 'ionic-angular';
+import {Page, NavController, NavParams} from 'ionic-angular';
 import {DataUtil} from '../../util/data-util';
 import {DAOLancamentos} from '../../dao/dao-lancamentos';
 
@@ -13,10 +13,47 @@ import {DAOLancamentos} from '../../dao/dao-lancamentos';
 })
 export class RelatorioPage {
   static get parameters() {
-    return [[NavController]];
+    return [[NavController], [NavParams]];
   }
 
-  constructor(nav) {
+  constructor(nav, params) {
     this.nav = nav;
+    this.dao = new DAOLancamentos();
+    this.entradaSaida = "entrada";
+
+    this.dataFiltro = params.get("parametro");
+    this.getList(this.entradaSaida);
+  }
+
+  getList(entradaSaida){
+    let dataUtil = new DataUtil();
+
+    let dataInicio = dataUtil.getFirstDay(this.dataFiltro);
+    let dataFim = dataUtil.getLastDay(this.dataFiltro);
+
+    this.dao.getListGroupByConta(dataInicio, dataFim, entradaSaida, (listaContas) => {
+      this.listaContas = listaContas;
+      this.calcPercentual();
+      console.log(this.listaContas);
+    });
+  }
+
+  calcTotal(){
+    let total = 0;
+    for(var i = 0; i < this.listaContas.length; i++){
+      total += this.listaContas[i].saldo;
+    }
+    return total; 
+  }
+
+  calcPercentual() {
+    let total = this.calcTotal();
+    for(var i = 0; i < this.listaContas.length; i++){
+      this.listaContas[i].percentual = (this.listaContas[i].saldo / total) * 100;
+    }
+  }
+
+  onSelect(entradaSaida){
+    this.getList(entradaSaida);
   }
 }

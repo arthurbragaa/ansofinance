@@ -9,7 +9,6 @@ export class DAOLancamentos {
                   "(id INTEGER PRIMARY KEY AUTOINCREMENT, conta TEXT, valor REAL, " +
                   "data INTEGER, descricao TEXT, entradaSaida TEXT, pago INTEGER )")
       .then((data) => {
-        console.log("Tabela lançamentos criada com sucesso");
       }, (error) => {
         console.log("Erro na criação da tabela de lançamentos " + JSON.stringify(error.err));
       });
@@ -117,27 +116,25 @@ export class DAOLancamentos {
     
   }
 
-  getLisGroupByConta(dataInico, dataFim, entradaSaida, successCallback){
+  getListGroupByConta(dataInico, dataFim, entradaSaida, successCallback){
     let storage = new Storage(SqlStorage);
 
     storage.query(
       `
-        SELECT TOTAL(valor) as saldoConta FROM lancamentos
+        SELECT conta, TOTAL(valor) as saldoConta FROM lancamentos
         WHERE data >= ? and data <= ? and entradaSaida = ?
         AND pago = 1
         GROUP BY conta
 
-      `,[dataInico.getTime(), dataFim.getTime()]
-    ).then((data) => {
-      let lista = [];
+      `,[dataInico.getTime(), dataFim.getTime(), entradaSaida]).then((data) => {
+        let lista = [];
+        for(var i = 0; i < data.res.rows.length; i++){
+          let item = data.res.rows.item(i);
+          let conta = {conta: item.conta, saldo: item.saldoConta, percentual: 0};
+          lista.push(conta);
+        }
+        successCallback(lista);
 
-      for(var i = 0; i < data.res.rows.length; i++){
-        let item = data.res.rows.item(i);
-
-        let conta = {conta: item.conta, saldo: item.saldoConta, percentual: 0};
-        lista.push(conta);
-      }
-      successCallback(lista);
     });
     
   }

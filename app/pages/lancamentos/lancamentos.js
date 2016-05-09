@@ -133,7 +133,7 @@ export class LancamentosPage {
   }
 
   onClickMonth(){
-    this.nav.push(RelatorioPage);
+    this.nav.push(RelatorioPage, {"parametro": this.dataFiltro});
   }
 
 }

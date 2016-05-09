@@ -9,5 +9,27 @@
 </ion-navbar>
 
 <ion-content padding class="relatorio">
- Relatório 
+  <ion-segment [(ngModel)]="entradaSaida">
+    <ion-segment-button value="entrada" (select)="onSelect('entrada')">Entrada</ion-segment-button>
+    <ion-segment-button value="saída" (select)="onSelect('saida')">Saída</ion-segment-button>
+  </ion-segment>
+  <ion-list>
+    <ion-item *ngFor="#item of listaContas">
+      <ion-row>
+        <ion-col width-67>
+          {{item.conta}}
+        </ion-col>
+
+        <ion-col width-33>
+          {{item.saldo | currency:"BRL":true:1.2}}
+        </ion-col>
+      </ion-row>
+
+      <div class="chart" [ngStyle]="{'width': item.percentual + '%'}">
+      </div>
+      <p>
+        {{item.percentual | number:"1.2-2"}}%
+      </p>
+    </ion-item>
+  </ion-list>
 </ion-content>
